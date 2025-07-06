@@ -69,7 +69,7 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
         // player is dead
         if (player.hp() <= 0) {         
             k.destroy(player);
-            k.go("level-1");            // CHANGE LATER!
+            k.go("level-1");            // change to CURRENT LEVEL
             return;
         }
 
@@ -77,7 +77,7 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
 
     // finish level logic
     player.onCollide("exit", () => {
-        k.go("level-2");
+        k.go("level-2");                // change to NEXT LEVEL
     });
 
     // inhaling animation - game object -> animation is always playing, tweak when it is visible 
