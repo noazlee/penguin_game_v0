@@ -1,4 +1,4 @@
-import { makePlayer } from "./entities";
+import { makeBirdEnemy, makeFlameEnemy, makeGuyEnemy, makePlayer, setControls } from "./entities";
 import { k } from "./kaboomCtx";
 import { makeMap } from "./utils";
 
@@ -48,6 +48,7 @@ async function gameSetup(){
             level1SpawnPoints.player[0].y,
         );
 
+        setControls(k, kirb);
         k.add(kirb);
 
         // camera
@@ -57,6 +58,24 @@ async function gameSetup(){
                 k.camPos(kirb.pos.x + 500, 800);  // camera follows player until certain point - player on left side of screen (+500)
             }
         });
+
+        // enemies
+        for (const flame of level1SpawnPoints.flame){
+            makeFlameEnemy(k, flame.x, flame.y); 
+        }
+        for (const guy of level1SpawnPoints.guy){
+            makeGuyEnemy(k, guy.x, guy.y); 
+        }
+        for (const bird of level1SpawnPoints.bird){
+            const possibleSpeeds = [100, 150, 200, 250, 300];
+            k.loop(10, () => {
+                makeBirdEnemy(k, 
+                    bird.x, 
+                    bird.y,
+                    possibleSpeeds[Math.floor(Math.random() * possibleSpeeds.length)] // get random element in array
+                ); 
+            });
+        }
 
     });
 
