@@ -1,5 +1,6 @@
 import type { AreaComp, BodyComp, DoubleJumpComp, GameObj, HealthComp, KaboomCtx, OpacityComp, PosComp, ScaleComp, SpriteComp } from "kaboom";
 import { scale } from "./constants";
+import { getCurrentLevel, isGameOver, loseLife } from "./state";
 
 // game object that has sprite component, area component, etc w properties.
 type PlayerGameObj = GameObj< // better practice to create specific type for player for specific behaviours
@@ -69,7 +70,12 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
         // player is dead
         if (player.hp() <= 0) {         
             k.destroy(player);
-            k.go("level-1");            // change to CURRENT LEVEL
+            loseLife();
+            if (isGameOver()) {
+                k.go("gameover");
+            } else {
+                k.go(`level-${getCurrentLevel()}`);
+            }
             return;
         }
 
@@ -77,7 +83,13 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
 
     // finish level logic
     player.onCollide("exit", () => {
-        k.go("level-2");                // change to NEXT LEVEL
+        const nextLevel = getCurrentLevel() + 1;
+        if (nextLevel <= 2) {  // Only 2 levels exist currently
+            k.go(`level-${nextLevel}`);
+        } else {
+            // For now, go back to menu after completing all levels
+            k.go("menu");
+        }
     });
 
     // inhaling animation - game object -> animation is always playing, tweak when it is visible 
@@ -111,7 +123,13 @@ export function makePlayer(k: KaboomCtx, posX: number, posY: number) {
 
     player.onUpdate(()=>{
         if (player.pos.y > 1200){   // Falls off edge - dead
-            k.go("level-1");        // CHANGE LATER!
+            k.destroy(player);
+            loseLife();
+            if (isGameOver()) {
+                k.go("gameover");
+            } else {
+                k.go(`level-${getCurrentLevel()}`);
+            }
         }
     });
 

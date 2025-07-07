@@ -1,6 +1,7 @@
 import { makeBirdEnemy, makeFlameEnemy, makeGuyEnemy, makePlayer, setControls } from "./entities";
 import { k } from "./kaboomCtx";
 import { makeMap } from "./utils";
+import { game_state, resetGame, setCurrentLevel } from "./state";
 
 
 async function gameSetup(){
@@ -34,8 +35,119 @@ async function gameSetup(){
         "level-2"
     );
 
+    // main menu scene
+    k.scene("menu", () => {
+        k.add([
+            k.rect(k.width(), k.height()),
+            k.color(k.Color.fromHex("#f7d7db")),
+            k.fixed(),
+        ]);
+
+        k.add([
+            k.text("Kirby Game", {
+                size: 64,
+            }),
+            k.pos(k.width() / 2, k.height() / 3),
+            k.anchor("center"),
+            k.color(0, 0, 0),
+        ]);
+
+        const playButton = k.add([
+            k.rect(200, 60),
+            k.pos(k.width() / 2, k.height() / 2),
+            k.anchor("center"),
+            k.color(255, 255, 255),
+            k.area(),
+            "playButton",
+        ]);
+
+        k.add([
+            k.text("Play", {
+                size: 32,
+            }),
+            k.pos(k.width() / 2, k.height() / 2),
+            k.anchor("center"),
+            k.color(0, 0, 0),
+        ]);
+
+        playButton.onHover(() => {
+            playButton.color = k.rgb(200, 200, 200);
+            k.setCursor("pointer");
+        });
+
+        playButton.onHoverEnd(() => {
+            playButton.color = k.rgb(255, 255, 255);
+            k.setCursor("default");
+        });
+
+        playButton.onClick(() => {
+            resetGame();
+            k.go("level-1");
+        });
+    });
+
+    // game over scene
+    k.scene("gameover", () => {
+        k.add([
+            k.rect(k.width(), k.height()),
+            k.color(k.Color.fromHex("#f7d7db")),
+            k.fixed(),
+        ]);
+
+        k.add([
+            k.text("Game Over", {
+                size: 64,
+            }),
+            k.pos(k.width() / 2, k.height() / 3),
+            k.anchor("center"),
+            k.color(0, 0, 0),
+        ]);
+
+        k.add([
+            k.text(`You reached level ${game_state.current_level}`, {
+                size: 24,
+            }),
+            k.pos(k.width() / 2, k.height() / 2 - 40),
+            k.anchor("center"),
+            k.color(0, 0, 0),
+        ]);
+
+        const menuButton = k.add([
+            k.rect(250, 60),
+            k.pos(k.width() / 2, k.height() / 2 + 40),
+            k.anchor("center"),
+            k.color(255, 255, 255),
+            k.area(),
+            "menuButton",
+        ]);
+
+        k.add([
+            k.text("Return to Menu", {
+                size: 24,
+            }),
+            k.pos(k.width() / 2, k.height() / 2 + 40),
+            k.anchor("center"),
+            k.color(0, 0, 0),
+        ]);
+
+        menuButton.onHover(() => {
+            menuButton.color = k.rgb(200, 200, 200);
+            k.setCursor("pointer");
+        });
+
+        menuButton.onHoverEnd(() => {
+            menuButton.color = k.rgb(255, 255, 255);
+            k.setCursor("default");
+        });
+
+        menuButton.onClick(() => {
+            k.go("menu");
+        });
+    });
+
     // level 1
     k.scene("level-1", () => {
+        setCurrentLevel(1);
         k.setGravity(1800);
         k.add([
             k.rect(k.width(), k.height()),
@@ -56,11 +168,41 @@ async function gameSetup(){
         setControls(k, kirb);
         k.add(kirb);
 
+        // HP counter UI
+        const hpText = k.add([
+            k.text("HP: 3/3", {
+                size: 32,
+            }),
+            k.color(0, 0, 0),
+            k.pos(20, k.height() - 40),
+            k.fixed(),
+            "hpCounter",
+        ]);
+
+        hpText.onUpdate(() => {
+            hpText.text = `HP: ${kirb.hp()}/3`;
+        });
+
+        // Lives counter UI
+        const livesText = k.add([
+            k.text("Lives: 3", {
+                size: 32,
+            }),
+            k.color(0, 0, 0),
+            k.pos(20, k.height() - 80),
+            k.fixed(),
+            "livesCounter",
+        ]);
+
+        livesText.onUpdate(() => {
+            livesText.text = `Lives: ${game_state.lives}`;
+        });
+
         // camera
         k.camScale(k.vec2(0.7)); // or k.camScale(0.7, 0.7)
         k.onUpdate(()=>{
-            if (kirb.pos.x < level1Layout.pos.x + 432) {
-                k.camPos(kirb.pos.x + 500, 800);  // camera follows player until certain point - player on left side of screen (+500)
+            if (kirb.pos.x < level1Layout.pos.x + 332) {
+                k.camPos(kirb.pos.x + 400, 800);  // camera follows player until certain point - player on left side of screen (+500)
             }
         });
 
@@ -86,6 +228,7 @@ async function gameSetup(){
 
     // level 2
     k.scene("level-2", () => {
+        setCurrentLevel(2);
         k.setGravity(1800);
         k.add([
             k.rect(k.width(), k.height()),
@@ -106,13 +249,43 @@ async function gameSetup(){
         setControls(k, kirb);
         k.add(kirb);
 
+        // HP counter UI
+        const hpText = k.add([
+            k.text("HP: 3/3", {
+                size: 32,
+            }),
+            k.color(0, 0, 1),
+            k.pos(20, k.height() - 40),
+            k.fixed(),
+            "hpCounter",
+        ]);
+
+        hpText.onUpdate(() => {
+            hpText.text = `HP: ${kirb.hp()}/3`;
+        });
+
+        // Lives counter UI
+        const livesText = k.add([
+            k.text("Lives: 3", {
+                size: 32,
+            }),
+            k.color(0, 0, 0),
+            k.pos(20, k.height() - 80),
+            k.fixed(),
+            "livesCounter",
+        ]);
+
+        livesText.onUpdate(() => {
+            livesText.text = `Lives: ${game_state.lives}`;
+        });
+
         // camera
         k.camScale(k.vec2(0.7)); // or k.camScale(0.7, 0.7)
         k.onUpdate(()=>{
-            let posX = 50 * 39 + 500;
+            let posX = 52 * 39 + 400;
             let posY = 18 * 39 - 200;
-            if (kirb.pos.x < level2Layout.pos.x + 50 * 39) {
-                posX = kirb.pos.x + 500;
+            if (kirb.pos.x < level2Layout.pos.x + 52 * 39) {
+                posX = kirb.pos.x + 400;
             }
             if (kirb.pos.y > level2Layout.pos.y + 18 * 39) {
                 posY = kirb.pos.y - 200;
@@ -141,8 +314,8 @@ async function gameSetup(){
 
     });
 
-    // change to level 1
-    k.go("level-2");
+    // start at main menu
+    k.go("menu");
 
 };
 
